@@ -3,6 +3,7 @@
 
 #include "Piece.h"
 #include <memory>
+#include <string>
 
 // Forward declaration of Board to avoid circular dependency
 class Board;

@@ -9,8 +9,9 @@
 
 class Board;
 
-enum class PieceType { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
+enum class PieceType { ROOK, KNIGHT, BISHOP, QUEEN, KING, PAWN, EMPTY };
 enum class Color { WHITE, BLACK };
+enum class pieceTypeWithColor { wr, wn, wb, wq, wk, wp, br, bn, bb, bq, bk, bp, empty };
 
 class Piece {
 protected:
@@ -24,6 +25,14 @@ public:
     {
         moves.reserve(64);
     }
+
+    pieceTypeWithColor getPieceTypeWithColor() {
+        int pieceType = static_cast<int>(type);
+        int pieceColor = static_cast<int>(color);
+        return static_cast<pieceTypeWithColor>(pieceType + 6 * pieceColor);
+    }
+    
+    bool hasMoved = false;
 
     std::vector<Position> moves;
 
@@ -44,6 +53,10 @@ public:
     // Setters
     void setPosition(Position pos) {
         position = pos;
+    }
+
+    virtual bool isCastling(Position to) {
+        return false;
     }
 
     std::vector<Position> filterCheckMoves(const Board& board, std::vector<Position>& moves);
@@ -68,7 +81,11 @@ public:
 
     char getSymbol() const override;
 
+    bool isCastling(Position to) override;
+
     std::vector<Position>& generatePossibleMoves(const Board& board) override;
+
+    std::vector<Position> castlingMoves;
 };
 
 class Queen : public Piece {

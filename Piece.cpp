@@ -2,7 +2,7 @@
 #include "Board.h"
 
 std::vector<Position> Piece::filterCheckMoves(const Board& board, std::vector<Position>& moves) {
-    std::cout << "filterCheckMoves: filtering check moves" << std::endl;
+    // std::cout << "filterCheckMoves: filtering check moves" << std::endl;
     // Filter out moves that would leave the king in check
     std::vector<Position> filteredMoves;
     Color currentColor = color;
@@ -26,6 +26,21 @@ std::vector<Position> Piece::filterCheckMoves(const Board& board, std::vector<Po
 
 // Implementation of King methods
 King::King(Color color, Position pos) : Piece(PieceType::KING, color, pos) {}
+
+bool King::isCastling(Position to) {
+    if(hasMoved) {
+        std::cout << "King::isCastling: king has moved, return false" << std::endl;
+        return false;
+    }
+    if (castlingMoves.empty()) {
+        std::cout << "King::isCastling: castlingMoves is empty, return false" << std::endl;
+        return false;
+    }
+    if (std::find(castlingMoves.begin(), castlingMoves.end(), to) != castlingMoves.end()) {
+        return true;
+    }
+    return false;
+}
 
 bool King::isValidMove(const Board& board, Position from, Position to) const {
     int rowDiff = std::abs(from.row - to.row);
@@ -60,6 +75,59 @@ std::vector<Position>& King::generatePossibleMoves(const Board& board) {
                 }
             }
         }
+    }
+
+    // add castling moves
+    bool castlingValid = false; 
+    if (!hasMoved && !board.getIsInCheck()) {
+        // Castling
+        if (color == Color::WHITE) {
+            if (board.getPiece({0, 5}) == nullptr && board.getPiece({0, 6}) == nullptr) {
+                std::shared_ptr<Piece> rook = board.getPiece({0, 7});
+                if (rook != nullptr && rook->getType() == PieceType::ROOK && rook->getColor() == Color::WHITE && !rook->hasMoved) {
+                    if (true) {
+                        moves.push_back({0, 6});
+                        castlingMoves.push_back({0, 6});
+                        castlingValid = true;
+                    }
+                }
+            }
+            if (board.getPiece({0, 3}) == nullptr && board.getPiece({0, 2}) == nullptr && board.getPiece({0, 1}) == nullptr) {
+                std::shared_ptr<Piece> rook = board.getPiece({0, 0});
+                if (rook != nullptr && rook->getType() == PieceType::ROOK && rook->getColor() == Color::WHITE && !rook->hasMoved) {
+                    if (true) {
+                        moves.push_back({0, 2});
+                        castlingMoves.push_back({0, 2});
+                        castlingValid = true;
+                    }
+                }
+            }
+        } else {
+            if (board.getPiece({7, 5}) == nullptr && board.getPiece({7, 6}) == nullptr) {
+                std::shared_ptr<Piece> rook = board.getPiece({7, 7});
+                if (rook != nullptr && rook->getType() == PieceType::ROOK && rook->getColor() == Color::BLACK && !rook->hasMoved) {
+                    if (true) {
+                        moves.push_back({7, 6});
+                        castlingMoves.push_back({7, 6});
+                        castlingValid = true;
+                    }
+                }
+            }
+            if (board.getPiece({7, 3}) == nullptr && board.getPiece({7, 2}) == nullptr && board.getPiece({7, 1}) == nullptr) {
+                std::shared_ptr<Piece> rook = board.getPiece({7, 0});
+                if (rook != nullptr && rook->getType() == PieceType::ROOK && rook->getColor() == Color::BLACK && !rook->hasMoved) {
+                    if (true) {
+                        moves.push_back({7, 2});
+                        castlingMoves.push_back({7, 2});
+                        castlingValid = true;
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "castlingValid: " << castlingValid << std::endl;
+    if (!castlingValid) {
+        castlingMoves.clear();
     }
 
     if (true) {

@@ -9,24 +9,8 @@ Window {
     width: 1280
     height: 720
     title: qsTr("Chess Game")
-    
-    // TextArea {
-    //     id: consoleOutput
-    //     readOnly: true
-    //     wrapMode: Text.Wrap
-    //     anchors {
-    //         bottom: whiteTimerDisplay.top
-    //         left: parent.left
-    //         bottomMargin: 10
-    //         leftMargin: 10
-    //     }
-    //     color: "blue"
-    //     width: 300
-    //     height: 400
-    //     text: customConsole.output
-    // }
+    color: "#f5f5f5" // Light background color
 
-    // Console output display
     ScrollView {
         id: consoleOutputScrollView
         anchors {
@@ -45,74 +29,68 @@ Window {
             readOnly: true
             wrapMode: Text.Wrap
             text: console.output
+            color: "#333333"
+            font.pixelSize: 14
+            padding: 10
+            background: Rectangle {
+                color: "#ffffff"
+                border.color: "#dddddd"
+                radius: 5
+            }
             onTextChanged: {
                 consoleOutput.scrollToEnd();
             }
         }
     }
 
-    // User input area
     Row {
         anchors {
-            // bottom: parent.bottom
             left: consoleOutputScrollView.left
             right: consoleOutputScrollView.right
             top: consoleOutputScrollView.bottom
-            // bottomMargin: 30
-            // leftMargin: 10
-            // rightMargin: 10
         }
         spacing: 10
 
         Rectangle {
             width: parent.width - 100
-            height: 25
-            border.color: "gray"
+            height: 40
+            border.color: "#dddddd"
             border.width: 1
-            color: "purple"
-            TextInput {
-                id: userInput
+            radius: 5
+            color: "#ffffff"
+            Row {
                 anchors.fill: parent
-                anchors.leftMargin: 5
-                anchors.rightMargin: 5
-                anchors.topMargin: 5
-                anchors.bottomMargin: 5
-                clip: true
-                text: ""
-                color: userInput.text === "" ? "lightgray" : "black"
-                onTextChanged: {
-                    if (userInput.text === "Type your message here...") {
-                        userInput.color = "lightgray";
-                    } else {
-                        userInput.color = "black";
-                    }
-                }
-                onFocusChanged: {
-                    if (userInput.focus) {
-                        if (userInput.text === "Type your message here...") {
+                TextInput {
+                    id: userInput
+                    width: parent.width - 30
+                    padding: 10
+                    // placeholderText: "Type your message here..."
+                    color: "#333333"
+                    font.pixelSize: 14
+                    // background: Rectangle {
+                    //     color: "transparent"
+                    // }
+                    onEditingFinished: {
+                        if (userInput.text !== "") {
+                            consoleOutput.append("\nUser: " + userInput.text);
                             userInput.text = "";
-                            userInput.color = "black";
-                        }
-                    } else {
-                        if (userInput.text === "") {
-                            userInput.text = "Type your message here...";
-                            userInput.color = "lightgray";
                         }
                     }
                 }
-                onEditingFinished: {
-                    if (userInput.text !== "Type your message here..." && userInput.text !== "") {
-                        consoleOutput.append("\nUser: " + userInput.text);
-                        userInput.text = "";
-                    }
+                Text {
+                    text: userInput.placeholderText
+                    anchors.centerIn: userInput
+                    color: "#999999"
+                    visible: userInput.text.length === 0
                 }
             }
         }
 
         Button {
             text: "Send"
+            font.pixelSize: 14
             onClicked: {
-                if (userInput.text !== "Type your message here..." && userInput.text !== "") {
+                if (userInput.text !== "") {
                     consoleOutput.append("\nUser: " + userInput.text);
                     userInput.text = "";
                 }
@@ -122,6 +100,12 @@ Window {
 
     Board {
         id: board
+        anchors {
+            top: parent.top
+            right: parent.right
+            topMargin: 20
+            rightMargin: 20
+        }
     }
 
     Text {
@@ -131,10 +115,9 @@ Window {
             rightMargin: 40
             bottom: parent.bottom
         }
-
         font.pixelSize: 14
         font.bold: true
-        color: "black"
+        color: "#333333"
         text: gameInterface.currentTimer
     }
 
@@ -145,10 +128,9 @@ Window {
             rightMargin: 40
             bottom: parent.bottom
         }
-
         font.pixelSize: 14
         font.bold: true
-        color: "black"
+        color: "#333333"
         text: gameInterface.blackTimer
     }
 
@@ -159,10 +141,9 @@ Window {
             rightMargin: 40
             bottom: parent.bottom
         }
-
         font.pixelSize: 14
         font.bold: true
-        color: "black"
+        color: "#333333"
         text: gameInterface.whiteTimer
     }
 
@@ -176,41 +157,39 @@ Window {
         }
 
         Column {
-            spacing: 5
-
-            // White Player Section
-            Row {
-                spacing: 5
-                Rectangle {
-                    width: 150
-                    height: 30
-                    color: "transparent"
-                    Text {
-                        id: whitePlayerName
-                        text: "White Player"
-                        font.pixelSize: 20
-                        visible: true
-                        anchors.left: parent.left
-                        MouseArea {
-                            anchors.fill: parent
-                            onDoubleClicked: {
-                                whitePlayerName.visible = false
-                                whitePlayerNameInput.visible = true
-                                whitePlayerNameInput.focus = true
-                            }
+            spacing: 10
+            Rectangle {
+                width: 150
+                height: 30
+                color: "transparent"
+                Text {
+                    id: whitePlayerName
+                    text: "White Player"
+                    font.pixelSize: 20
+                    visible: true
+                    color: "#333333"
+                    MouseArea {
+                        anchors.fill: parent
+                        onDoubleClicked: {
+                            whitePlayerName.visible = false
+                            whitePlayerNameInput.visible = true
+                            whitePlayerNameInput.focus = true
                         }
                     }
-                    TextInput {
-                        id: whitePlayerNameInput
-                        text: whitePlayerName.text
-                        font.pixelSize: 20
-                        visible: false
-                        anchors.left: parent.left
-                        onEditingFinished: {
-                            whitePlayerName.text = whitePlayerNameInput.text
-                            whitePlayerName.visible = true
-                            whitePlayerNameInput.visible = false
-                        }
+                }
+                TextInput {
+                    id: whitePlayerNameInput
+                    text: whitePlayerName.text
+                    font.pixelSize: 20
+                    visible: false
+                    color: "#333333"
+                    // background: Rectangle {
+                    //     color: "transparent"
+                    // }
+                    onEditingFinished: {
+                        whitePlayerName.text = whitePlayerNameInput.text
+                        whitePlayerName.visible = true
+                        whitePlayerNameInput.visible = false
                     }
                 }
             }
@@ -224,13 +203,16 @@ Window {
                 width: 100
                 height: 100
                 clip: true
+                border.color: "#dddddd"
+                border.width: 1
+                radius: 5
 
                 Image {
                     id: whiteProfilePicture
                     width: parent.width
                     height: parent.height
                     fillMode: Image.PreserveAspectCrop
-                    source: "ui/Images/player1.png" // Set the default image source here
+                    source: "ui/Images/player1.png"
                 }
 
                 MouseArea {
@@ -242,6 +224,7 @@ Window {
             Text {
                 text: "White"
                 font.pixelSize: 16
+                color: "#333333"
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
@@ -280,41 +263,39 @@ Window {
         }
 
         Column {
-            spacing: 5
-
-            // Black Player Section
-            Row {
-                spacing: 5
-                Rectangle {
-                    width: 150
-                    height: 30
-                    color: "transparent"
-                    Text {
-                        id: blackPlayerName
-                        text: "Black Player"
-                        font.pixelSize: 20
-                        visible: true
-                        anchors.left: parent.left
-                        MouseArea {
-                            anchors.fill: parent
-                            onDoubleClicked: {
-                                blackPlayerName.visible = false
-                                blackPlayerNameInput.visible = true
-                                blackPlayerNameInput.focus = true
-                            }
+            spacing: 10
+            Rectangle {
+                width: 150
+                height: 30
+                color: "transparent"
+                Text {
+                    id: blackPlayerName
+                    text: "Black Player"
+                    font.pixelSize: 20
+                    visible: true
+                    color: "#333333"
+                    MouseArea {
+                        anchors.fill: parent
+                        onDoubleClicked: {
+                            blackPlayerName.visible = false
+                            blackPlayerNameInput.visible = true
+                            blackPlayerNameInput.focus = true
                         }
                     }
-                    TextInput {
-                        id: blackPlayerNameInput
-                        text: blackPlayerName.text
-                        font.pixelSize: 20
-                        visible: false
-                        anchors.left: parent.left
-                        onEditingFinished: {
-                            blackPlayerName.text = blackPlayerNameInput.text
-                            blackPlayerName.visible = true
-                            blackPlayerNameInput.visible = false
-                        }
+                }
+                TextInput {
+                    id: blackPlayerNameInput
+                    text: blackPlayerName.text
+                    font.pixelSize: 20
+                    visible: false
+                    color: "#333333"
+                    // background: Rectangle {
+                    //     color: "transparent"
+                    // }
+                    onEditingFinished: {
+                        blackPlayerName.text = blackPlayerNameInput.text
+                        blackPlayerName.visible = true
+                        blackPlayerNameInput.visible = false
                     }
                 }
             }
@@ -328,13 +309,16 @@ Window {
                 width: 100
                 height: 100
                 clip: true
+                border.color: "#dddddd"
+                border.width: 1
+                radius: 5
 
                 Image {
                     id: blackProfilePicture
                     width: parent.width
                     height: parent.height
                     fillMode: Image.PreserveAspectCrop
-                    source: "ui/Images/player2.png" // Set the default image source here
+                    source: "ui/Images/player2.png"
                 }
 
                 MouseArea {
@@ -346,6 +330,7 @@ Window {
             Text {
                 text: "Black"
                 font.pixelSize: 16
+                color: "#333333"
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 

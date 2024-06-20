@@ -113,7 +113,10 @@ void Board::printBoard() const {
 
 // Move a piece from one position to another
 bool Board::movePiece(Position from, Position to, bool safetyCheck, bool undo) {
-    std::cout << "movePiece: from " << from << " to " << to << std::endl;
+    // std::cout << "movePiece: from " << from << " to " << to << std::endl;
+    if (safetyCheck && !undo) {
+        changedPositions.clear();
+    }
     std::shared_ptr<Piece> piece = getPiece(from);
     if (safetyCheck && !piece) {
         std::cout << "you attempted to move a non-existent piece... don't do that again." << std::endl;
@@ -124,15 +127,65 @@ bool Board::movePiece(Position from, Position to, bool safetyCheck, bool undo) {
         return false;
     }
 
-    if (!safetyCheck || piece && piece->isValidMove(*this, from, to)) {
+    // if (!safetyCheck || piece && piece->isValidMove(*this, from, to)) {
+    if (!safetyCheck || piece) {
         std::vector<Position> possibleMoves = piece->moves;
         if (safetyCheck && std::find(possibleMoves.begin(), possibleMoves.end(), to) == possibleMoves.end()) {
             std::cout << "move not found in piece's valid moves: " << from << " to " << to << std::endl;
             return false;
         }
+
+        // handle castling
+        bool castling = false;
+        if (piece->getType() == PieceType::KING && piece->isCastling(to)) {
+            castling = true;
+            std::cout << "castling detected" << std::endl;
+            std::shared_ptr<Piece> rook = nullptr;
+            Position rookInitialPos;
+            Position rookFinalPos;
+            if (sideToMove == Color::WHITE) {
+                if (to.col == 2) {
+                    rookInitialPos = Position(0, 0);
+                    rookFinalPos = Position(0, 3);
+                    rook = getPiece(rookInitialPos);
+                } else if (to.col == 6) {
+                    rookInitialPos = Position(0, 7);
+                    rookFinalPos = Position(0, 5);
+                    rook = getPiece(rookInitialPos);
+                    if(!rook) {
+                        std::cout << "no rook found for castling" << std::endl;
+                        return false;
+                    }
+                }
+            } else {
+                if (to.col == 2) {
+                    rookInitialPos = Position(7, 0);
+                    rookFinalPos = Position(7, 3);
+                    rook = getPiece(rookInitialPos);
+                } else if (to.col == 6) {
+                    rookInitialPos = Position(7, 7);
+                    rookFinalPos = Position(7, 5);
+                    rook = getPiece(rookInitialPos);
+                }
+            }
+            if (!rook) {
+                std::cout << "no rook found for castling" << std::endl;
+                return false;
+            }
+            board[rookFinalPos.row][rookFinalPos.col] = rook;
+            stringBoard[rookFinalPos.row * 8 + rookFinalPos.col] = piece2string(rook);
+            board[rookInitialPos.row][rookInitialPos.col] = nullptr;
+            stringBoard[rookInitialPos.row * 8 + rookInitialPos.col] = " ";
+            if (safetyCheck && !undo) {
+                changedPositions.emplace_back(std::make_pair(rookInitialPos.row*8 + rookInitialPos.col, static_cast<int>(pieceTypeWithColor::empty)));
+                changedPositions.emplace_back(std::make_pair(rookFinalPos.row*8 + rookFinalPos.col, static_cast<int>(rook->getPieceTypeWithColor())));
+            }
+        }
+
         std::shared_ptr<Piece> targetPiece = getPiece(to);
         if (!undo) {
-            moves.emplace_back(new Move(from, to, piece, targetPiece));
+            moves.emplace_back(new Move(from, to, piece, targetPiece, castling));
+            if(safetyCheck) piece->hasMoved = true;
             std::cout << "move history size: " << moves.size() << std::endl;
         }
         if (targetPiece) {
@@ -143,22 +196,26 @@ bool Board::movePiece(Position from, Position to, bool safetyCheck, bool undo) {
         board[from.row][from.col] = nullptr;
         stringBoard[from.row * 8 + from.col] = " ";
         piece->setPosition(to);
+        if (safetyCheck && !undo) {
+            changedPositions.emplace_back(std::make_pair(from.row*8 + from.col, static_cast<int>(pieceTypeWithColor::empty)));
+            changedPositions.emplace_back(std::make_pair(to.row*8 + to.col, static_cast<int>(piece->getPieceTypeWithColor())));
+        }
         switchSideToMove();
         return true;
     }
     return false;
 }
 bool Board::undoMove() {
-    std::cout << "undoing move..." << std::endl;
+    // std::cout << "undoing move..." << std::endl;
     if (moves.empty()) {
         return false;
     }
-    std::cout << "undoMove: move history size: " << moves.size() << std::endl;
+    // std::cout << "undoMove: move history size: " << moves.size() << std::endl;
     Move* lastMove = moves.back();
     moves.pop_back();
     lastMove->undo(*this);
     delete lastMove;
-    std::cout << "undoMove: move history size2: " << moves.size() << std::endl;
+    // std::cout << "undoMove: move history size2: " << moves.size() << std::endl;
 }
 
 // Get the piece at a specific position

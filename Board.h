@@ -7,7 +7,7 @@
 #include <memory>
 
 class Board {
-private:
+public:
     std::shared_ptr<Piece> whiteKing;
     std::shared_ptr<Piece> blackKing;
     std::vector<std::vector<std::shared_ptr<Piece>>> board;
@@ -21,6 +21,7 @@ private:
         "bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp",
         "br", "bn", "bb", "bq", "bk", "bb", "bn", "br"
     };
+    std::vector<std::pair<int, int>> changedPositions;
     std::string piece2string(std::shared_ptr<Piece> piece) const {
         if (piece == nullptr) {
             return "  ";
@@ -48,7 +49,6 @@ private:
     Color sideToMove;
     bool isInCheck = false;
 
-public:
     // Constructor
     Board();
 
@@ -62,6 +62,7 @@ public:
     void printBoard() const;
 
     // Move a piece from one position to another
+    enum class MoveType { FAILED, NORMAL, CASTLING, PROMOTION };
     bool movePiece(Position from, Position to, bool safetyCheck = true, bool undo = false);
     bool undoMove();
 
@@ -108,7 +109,7 @@ public:
     // Generate all possible moves for the current player
     std::vector<Move> generateAllPossibleMoves(Color color) const;
 
-    bool updateCheckStatus() {
+    void updateCheckStatus() {
         isInCheck = isCheck(sideToMove);
     }
 

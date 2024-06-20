@@ -24,7 +24,6 @@ qt_add_qml_module(appChess2
         SOURCES Utility.h
         SOURCES Move.h Move.cpp
         SOURCES Piece.h Piece.cpp
-        SOURCES Player.h Player.cpp
         SOURCES GameInterface.h GameInterface.cpp
         SOURCES Console.h Console.cpp
     RESOURCES

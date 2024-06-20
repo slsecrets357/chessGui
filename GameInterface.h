@@ -36,6 +36,7 @@ public:
     std::shared_ptr<Piece> selectedPiece;
     bool successfulMove = false;
     std::vector<QList<QString>> boardHistory;
+    std::vector<QString> pieceRepresentations = {"wr", "wn", "wb", "wq", "wk", "wp", "br", "bn", "bb", "bq", "bk", "bp", ""};
 
 
     QString currentTimer() const;
@@ -126,7 +127,7 @@ public slots:
             }
         }
         if (gameEngine.board.movePiece(from, to)) {
-            makeMove(startGrid, destGrid);
+            makeMove();
             if(gameEngine.board.getSideToMove() == Color::WHITE) {
                 m_blackTimeRemaining = m_blackTimeRemaining.addSecs(blackTimeIncrementPerMove);
             } else {
@@ -167,9 +168,12 @@ public slots:
         setLegalMoves(newLegalMoves);
         return true;
     }
-    bool makeMove(int startingGrid, int destinationGrid) {
-        m_dummyBoard[destinationGrid] = m_dummyBoard[startingGrid];
-        m_dummyBoard[startingGrid] = "";
+    bool makeMove() {
+        for (std::pair<int, int> pair: gameEngine.board.changedPositions) {
+            m_dummyBoard[pair.first] = pieceRepresentations[pair.second];
+        }
+        // m_dummyBoard[destinationGrid] = m_dummyBoard[startingGrid];
+        // m_dummyBoard[startingGrid] = "";
         boardHistory.push_back(m_dummyBoard);
         emit dummyBoardChanged();
         return true;
