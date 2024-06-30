@@ -2,8 +2,8 @@
 #include <QQmlApplicationEngine>
 
 #include <QQmlContext>
-#include <GameInterface.h>
-#include <Console.h>
+#include "GameInterface.h"
+#include "Console.h"
 
 int main(int argc, char *argv[])
 {

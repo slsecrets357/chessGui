@@ -1,11 +1,26 @@
 #include "Piece.h"
 #include "Board.h"
 
+std::ostream& operator<<(std::ostream& os, Color color) {
+    if (color == Color::WHITE) {
+        os << "WHITE";
+    } else {
+        os << "BLACK";
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Piece& piece) {
+    os << piece.getPieceType() <<  " at " << piece.getPosition() << " with color " << piece.getColor();
+    return os;
+}
+
 std::vector<Position> Piece::filterCheckMoves(const Board& board, std::vector<Position>& moves) {
     // std::cout << "filterCheckMoves: filtering check moves" << std::endl;
     // Filter out moves that would leave the king in check
     std::vector<Position> filteredMoves;
     Color currentColor = color;
+    std::cout << "filterCheckMoves: moves before filtering: " << moves.size() << std::endl;
     for (auto move : moves) {
         //const cast board
         Board& boardRef = const_cast<Board&>(board);
@@ -14,6 +29,7 @@ std::vector<Position> Piece::filterCheckMoves(const Board& board, std::vector<Po
             continue;
         }
         if (!boardRef.isCheck(currentColor)) {
+            std::cout << "filterCheckMoves: move valid. color: " << currentColor << std::endl;
             filteredMoves.push_back(move);
         } else {
             std::cout << "filterCheckMoves: filtered move: " << move << std::endl;
@@ -59,6 +75,10 @@ bool King::isValidMove(const Board& board, Position from, Position to) const {
 
 char King::getSymbol() const {
     return (color == Color::WHITE) ? 'K' : 'k';
+}
+
+std::string King::getPieceType() const {
+    return "King";
 }
 
 std::vector<Position>& King::generatePossibleMoves(const Board& board) {
@@ -169,6 +189,10 @@ char Queen::getSymbol() const {
     return (color == Color::WHITE) ? 'Q' : 'q';
 }
 
+std::string Queen::getPieceType() const {
+    return "Queen";
+}
+
 std::vector<Position>& Queen::generatePossibleMoves(const Board& board) {
     moves.clear();
     // Directions: horizontal, vertical, and diagonal
@@ -242,6 +266,10 @@ char Bishop::getSymbol() const {
     return (color == Color::WHITE) ? 'B' : 'b';
 }
 
+std::string Bishop::getPieceType() const {
+    return "Bishop";
+}
+
 std::vector<Position>& Bishop::generatePossibleMoves(const Board& board) {
     moves.clear();
 
@@ -294,6 +322,10 @@ bool Knight::isValidMove(const Board& board, Position from, Position to) const {
 
 char Knight::getSymbol() const {
     return (color == Color::WHITE) ? 'N' : 'n';
+}
+
+std::string Knight::getPieceType() const {
+    return "Knight";
 }
 
 std::vector<Position>& Knight::generatePossibleMoves(const Board& board) {
@@ -356,6 +388,10 @@ char Rook::getSymbol() const {
     return (color == Color::WHITE) ? 'R' : 'r';
 }
 
+std::string Rook::getPieceType() const {
+    return "Rook";
+}
+
 std::vector<Position>& Rook::generatePossibleMoves(const Board& board) {
     moves.clear();
 
@@ -407,6 +443,10 @@ bool Pawn::isValidMove(const Board& board, Position from, Position to) const {
 
 char Pawn::getSymbol() const {
     return (color == Color::WHITE) ? 'P' : 'p';
+}
+
+std::string Pawn::getPieceType() const {
+    return "Pawn";
 }
 
 std::vector<Position>& Pawn::generatePossibleMoves(const Board& board) {

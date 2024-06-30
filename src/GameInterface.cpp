@@ -18,7 +18,7 @@ GameInterface::GameInterface(QObject *parent)
 
     m_whiteTimeRemaining = QTime(0, whitePlayerTimeMinutes, 0);
     setWhiteTimer(m_whiteTimeRemaining.toString("mm:ss.zzz"));
-    m_whiteTimeTimer->start();
+    // m_whiteTimeTimer->start();
 
     m_blackTimeTimer = new QTimer(this);
     m_blackTimeTimer->setInterval(50);
@@ -26,7 +26,7 @@ GameInterface::GameInterface(QObject *parent)
 
     m_blackTimeRemaining = QTime(0, blackPlayerTimeMinutes, 0);
     setBlackTimer(m_blackTimeRemaining.toString("mm:ss.zzz"));
-    m_blackTimeTimer->start();
+    // m_blackTimeTimer->start();
 
 
     printBoard();
@@ -83,7 +83,7 @@ void GameInterface::currentTimeTimerTimeout()
 void GameInterface::whiteTimeTimerTimeout()
 {
     m_whiteTimeRemaining = m_whiteTimeRemaining.addMSecs(-50);
-    setWhiteTimer("white: " + m_whiteTimeRemaining.toString("mm:ss.zzz"));
+    setWhiteTimer("" + m_whiteTimeRemaining.toString("mm:ss.zzz"));
 
     if (m_whiteTimeRemaining == QTime(0, 0, 0)) {
         m_whiteTimeTimer->stop();
@@ -95,7 +95,7 @@ void GameInterface::whiteTimeTimerTimeout()
 void GameInterface::blackTimeTimerTimeout()
 {
     m_blackTimeRemaining = m_blackTimeRemaining.addMSecs(-50);
-    setBlackTimer("black: " + m_blackTimeRemaining.toString("mm:ss.zzz"));
+    setBlackTimer("" + m_blackTimeRemaining.toString("mm:ss.zzz"));
 
     if (m_blackTimeRemaining == QTime(0, 0, 0)) {
         m_blackTimeTimer->stop();
@@ -141,4 +141,16 @@ void GameInterface::setBlackTimer(const QString &newBlackTimer)
         return;
     m_blackTimer = newBlackTimer;
     emit blackTimerChanged();
+}
+
+void GameInterface::addTimeToBlackTimer(int seconds)
+{
+    m_blackTimeRemaining = m_blackTimeRemaining.addSecs(seconds);
+    setBlackTimer("" + m_blackTimeRemaining.toString("mm:ss.zzz"));
+}
+
+void GameInterface::addTimeToWhiteTimer(int seconds)
+{
+    m_whiteTimeRemaining = m_whiteTimeRemaining.addSecs(seconds);
+    setWhiteTimer("" + m_whiteTimeRemaining.toString("mm:ss.zzz"));
 }

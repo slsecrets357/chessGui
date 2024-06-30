@@ -5,12 +5,16 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
-#include <Position.h>
+#include "Position.h"
+#include <string>
 
 class Board;
 
 enum class PieceType { ROOK, KNIGHT, BISHOP, QUEEN, KING, PAWN, EMPTY };
+
 enum class Color { WHITE, BLACK };
+std::ostream& operator<<(std::ostream& os, Color color);
+
 enum class pieceTypeWithColor { wr, wn, wb, wq, wk, wp, br, bn, bb, bq, bk, bp, empty };
 
 class Piece {
@@ -67,9 +71,12 @@ public:
     // Get the symbol for printing the piece
     virtual char getSymbol() const = 0;
 
+    virtual std::string getPieceType() const = 0;
+
     // Generate all possible moves for the piece
     virtual std::vector<Position>& generatePossibleMoves(const Board& board) = 0;
 };
+std::ostream& operator<<(std::ostream& os, const Piece& piece);
 
 // Derived classes for each type of piece
 
@@ -80,6 +87,8 @@ public:
     bool isValidMove(const Board& board, Position from, Position to) const override;
 
     char getSymbol() const override;
+
+    std::string getPieceType() const override;
 
     bool isCastling(Position to) override;
 
@@ -95,6 +104,7 @@ public:
     bool isValidMove(const Board& board, Position from, Position to) const override;
 
     char getSymbol() const override;
+    std::string getPieceType() const override;
 
     std::vector<Position>& generatePossibleMoves(const Board& board) override;
 };
@@ -106,6 +116,7 @@ public:
     bool isValidMove(const Board& board, Position from, Position to) const override;
 
     char getSymbol() const override;
+    std::string getPieceType() const override;
 
     std::vector<Position>& generatePossibleMoves(const Board& board) override;
 };
@@ -117,6 +128,7 @@ public:
     bool isValidMove(const Board& board, Position from, Position to) const override;
 
     char getSymbol() const override;
+    std::string getPieceType() const override;
 
     std::vector<Position>& generatePossibleMoves(const Board& board) override;
 };
@@ -128,6 +140,7 @@ public:
     bool isValidMove(const Board& board, Position from, Position to) const override;
 
     char getSymbol() const override;
+    std::string getPieceType() const override;
 
     std::vector<Position>& generatePossibleMoves(const Board& board) override;
 };
@@ -139,6 +152,7 @@ public:
     bool isValidMove(const Board& board, Position from, Position to) const override;
 
     char getSymbol() const override;
+    std::string getPieceType() const override;
 
     std::vector<Position>& generatePossibleMoves(const Board& board) override;
 };

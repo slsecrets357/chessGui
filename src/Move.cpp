@@ -62,6 +62,11 @@ void Move::undo(Board& board) {
     // Restore the captured piece
     if (capturedPiece) {
         board.addPiece(capturedPiece, to);
+        if (capturedPiece->getColor() == Color::WHITE) {
+            board.whitePieces.push_back(capturedPiece);
+        } else {
+            board.blackPieces.push_back(capturedPiece);
+        }
     }
 
     // Handle promotion undo

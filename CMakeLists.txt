@@ -9,7 +9,7 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
 qt_standard_project_setup()
 
 qt_add_executable(appChess2
-    main.cpp
+    src/main.cpp
 )
 
 qt_add_qml_module(appChess2
@@ -18,14 +18,15 @@ qt_add_qml_module(appChess2
     QML_FILES
         Main.qml
         ui/Board.qml
-        SOURCES Position.h
-        SOURCES Board.h Board.cpp
-        SOURCES Game.h Game.cpp
-        SOURCES Utility.h
-        SOURCES Move.h Move.cpp
-        SOURCES Piece.h Piece.cpp
-        SOURCES GameInterface.h GameInterface.cpp
-        SOURCES Console.h Console.cpp
+        ui/UserProfile.qml
+        SOURCES src/Position.h
+        SOURCES src/Board.h src/Board.cpp
+        SOURCES src/Game.h src/Game.cpp
+        SOURCES src/Utility.h
+        SOURCES src/Move.h src/Move.cpp
+        SOURCES src/Piece.h src/Piece.cpp
+        SOURCES src/GameInterface.h src/GameInterface.cpp
+        SOURCES src/Console.h src/Console.cpp
     RESOURCES
         "ui/Images/bp.png"
         "ui/Images/br.png"

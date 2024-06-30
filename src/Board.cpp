@@ -104,7 +104,7 @@ void Board::printBoard() const {
             if (board[row][col] != nullptr) {
                 std::cout << board[row][col]->getSymbol() << " ";
             } else {
-                std::cout << ". ";
+                std::cout << "- ";
             }
         }
         std::cout << std::endl;
@@ -176,29 +176,59 @@ bool Board::movePiece(Position from, Position to, bool safetyCheck, bool undo) {
             stringBoard[rookFinalPos.row * 8 + rookFinalPos.col] = piece2string(rook);
             board[rookInitialPos.row][rookInitialPos.col] = nullptr;
             stringBoard[rookInitialPos.row * 8 + rookInitialPos.col] = " ";
+            rook->setPosition(rookFinalPos);
             if (safetyCheck && !undo) {
                 changedPositions.emplace_back(std::make_pair(rookInitialPos.row*8 + rookInitialPos.col, static_cast<int>(pieceTypeWithColor::empty)));
                 changedPositions.emplace_back(std::make_pair(rookFinalPos.row*8 + rookFinalPos.col, static_cast<int>(rook->getPieceTypeWithColor())));
             }
         }
 
-        std::shared_ptr<Piece> targetPiece = getPiece(to);
-        if (!undo) {
-            moves.emplace_back(new Move(from, to, piece, targetPiece, castling));
-            if(safetyCheck) piece->hasMoved = true;
-            std::cout << "move history size: " << moves.size() << std::endl;
+        bool promotion = false;
+        std::shared_ptr<Piece> promotionPiece = nullptr;
+        if (safetyCheck && piece->getType() == PieceType::PAWN && (to.row == 0 || to.row == 7)) {
+            promotion = true;
         }
-        if (targetPiece) {
-            removePiece(targetPiece);
-        }
-        board[to.row][to.col] = piece;
-        stringBoard[to.row * 8 + to.col] = piece2string(piece);
-        board[from.row][from.col] = nullptr;
-        stringBoard[from.row * 8 + from.col] = " ";
-        piece->setPosition(to);
-        if (safetyCheck && !undo) {
-            changedPositions.emplace_back(std::make_pair(from.row*8 + from.col, static_cast<int>(pieceTypeWithColor::empty)));
-            changedPositions.emplace_back(std::make_pair(to.row*8 + to.col, static_cast<int>(piece->getPieceTypeWithColor())));
+        if (promotion) {
+            promotionPiece = std::make_shared<Queen>(piece->getColor(), to);
+            if (!undo) {
+                moves.emplace_back(new Move(from, to, piece, nullptr, castling, promotion));
+                if(safetyCheck) piece->hasMoved = true;
+                std::cout << "move history size: " << moves.size() << std::endl;
+            }
+            // remove pawn from board
+            removePiece(piece);
+            // add queen to board
+            if(promotionPiece->getColor() == Color::WHITE) {
+                whitePieces.push_back(promotionPiece);
+            } else {
+                blackPieces.push_back(promotionPiece);
+            }
+            board[to.row][to.col] = promotionPiece;
+            stringBoard[to.row * 8 + to.col] = piece2string(promotionPiece);
+
+            if (safetyCheck && !undo) {
+                changedPositions.emplace_back(std::make_pair(from.row*8 + from.col, static_cast<int>(pieceTypeWithColor::empty)));
+                changedPositions.emplace_back(std::make_pair(to.row*8 + to.col, static_cast<int>(promotionPiece->getPieceTypeWithColor())));
+            }
+        } else {
+            std::shared_ptr<Piece> targetPiece = getPiece(to);
+            if (!undo) {
+                moves.emplace_back(new Move(from, to, piece, targetPiece, castling, promotion));
+                if(safetyCheck) piece->hasMoved = true;
+                std::cout << "move history size: " << moves.size() << std::endl;
+            }
+            if (targetPiece) {
+                removePiece(targetPiece);
+            }
+            board[to.row][to.col] = piece;
+            stringBoard[to.row * 8 + to.col] = piece2string(piece);
+            board[from.row][from.col] = nullptr;
+            stringBoard[from.row * 8 + from.col] = " ";
+            piece->setPosition(to);
+            if (safetyCheck && !undo) {
+                changedPositions.emplace_back(std::make_pair(from.row*8 + from.col, static_cast<int>(pieceTypeWithColor::empty)));
+                changedPositions.emplace_back(std::make_pair(to.row*8 + to.col, static_cast<int>(piece->getPieceTypeWithColor())));
+            }
         }
         switchSideToMove();
         return true;
@@ -232,6 +262,11 @@ void Board::addPiece(std::shared_ptr<Piece> piece, Position pos) {
         board[pos.row][pos.col] = piece;
         stringBoard[pos.row * 8 + pos.col] = piece2string(piece);
         piece->setPosition(pos);
+        if (piece->getColor() == Color::WHITE) {
+            whitePieces.push_back(piece);
+        } else {
+            blackPieces.push_back(piece);
+        }
     }
 }
 
@@ -272,6 +307,7 @@ bool Board::isCheck(Color color) const {
     // Check if any opponent's piece can move to the king's position
     std::vector<std::shared_ptr<Piece>> opponentPieces = (color == Color::WHITE) ? blackPieces : whitePieces;
     for (std::shared_ptr<Piece> piece : opponentPieces) {
+        // std::cout << "checking piece: " << *piece << std::endl;
         if (piece->isValidMove(*this, piece->getPosition(), kingPos)) {
             return true;
         }

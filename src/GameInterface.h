@@ -3,10 +3,10 @@
 
 #include <QObject>
 #include <QList>
-#include <Position.h>
+#include "Position.h"
 #include <QDebug>
-#include <Game.h>
-#include <Board.h>
+#include "Game.h"
+#include "Board.h"
 #include <QString>
 #include <QTimer>
 #include <QTime>
@@ -35,6 +35,7 @@ public:
     Position to;
     std::shared_ptr<Piece> selectedPiece;
     bool successfulMove = false;
+    bool paused = true;
     std::vector<QList<QString>> boardHistory;
     std::vector<QString> pieceRepresentations = {"wr", "wn", "wb", "wq", "wk", "wp", "br", "bn", "bb", "bq", "bk", "bp", ""};
 
@@ -55,7 +56,12 @@ public slots:
     void currentTimeTimerTimeout();
     void whiteTimeTimerTimeout();
     void blackTimeTimerTimeout();
+    void addTimeToWhiteTimer(int seconds);
+    void addTimeToBlackTimer(int seconds);
 
+    void print() {
+        gameEngine.board.printBoard();
+    }
     bool undo() {
         std::cout << "undoing move1..." << std::endl;
         //print board
@@ -128,16 +134,19 @@ public slots:
         }
         if (gameEngine.board.movePiece(from, to)) {
             makeMove();
-            if(gameEngine.board.getSideToMove() == Color::WHITE) {
-                m_blackTimeRemaining = m_blackTimeRemaining.addSecs(blackTimeIncrementPerMove);
-            } else {
-                 m_whiteTimeRemaining = m_whiteTimeRemaining.addSecs(whiteTimeIncrementPerMove);
-            }
             gameEngine.board.updateCheckStatus();
             if(gameEngine.board.getIsInCheck()) {
                 std::cout << "player in check!!" << std::endl;
             }
-
+            if(gameEngine.board.getSideToMove() == Color::WHITE) {
+                addTimeToBlackTimer(blackTimeIncrementPerMove);
+                m_whiteTimeTimer->start();
+                m_blackTimeTimer->stop();
+            } else {
+                addTimeToWhiteTimer(whiteTimeIncrementPerMove);
+                m_blackTimeTimer->start();
+                m_whiteTimeTimer->stop();
+            }
         } else {
             std::cout << "invalid move from " << from << " to " << to << ". please try again. " << std::endl;
         }
@@ -151,6 +160,8 @@ public slots:
     }
     bool computeLegalMoves(int grid) {
         auto newLegalMoves = QList<int>();
+        std::shared_ptr<Piece> piece = gameEngine.board.getPiece(Position(grid));
+        std::cout << "posiiton: " << piece->getPosition() << std::endl;
         std::vector<Position> legalMoves = gameEngine.board.getPiece(Position(grid))->generatePossibleMoves(gameEngine.board);
         if (legalMoves.empty()) {
             std::cout << "no legal moves for this piece." << std::endl;
