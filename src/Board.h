@@ -45,6 +45,8 @@ public:
     }
     std::vector<std::shared_ptr<Piece>> whitePieces;
     std::vector<std::shared_ptr<Piece>> blackPieces;
+    std::vector<std::shared_ptr<Piece>> capturedWhitePieces;
+    std::vector<std::shared_ptr<Piece>> capturedBlackPieces;
     std::vector<Move*> moves;
     Color sideToMove;
     bool isInCheck = false;

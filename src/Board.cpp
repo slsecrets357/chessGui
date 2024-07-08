@@ -278,8 +278,10 @@ void Board::removePiece(std::shared_ptr<Piece> piece) {
         stringBoard[pos.row * 8 + pos.col] = " ";
     }
     if (piece->getColor() == Color::WHITE) {
+        capturedWhitePieces.push_back(piece);
         whitePieces.erase(std::remove(whitePieces.begin(), whitePieces.end(), piece), whitePieces.end());
     } else {
+        capturedBlackPieces.push_back(piece);
         blackPieces.erase(std::remove(blackPieces.begin(), blackPieces.end(), piece), blackPieces.end());
     }
 }

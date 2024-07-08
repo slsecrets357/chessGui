@@ -6,13 +6,15 @@ Item {
         right: parent.right
         top: parent.top
     }
-    height: parent.height * 4/5
+    height: parent.height
     width: parent.height * 4/5
 
     signal repaintCanvases() // Define the signal at the top level
 
     property var initialBoard: gameInterface.dummyBoard
     property var legalMoves: gameInterface.legalMoves
+    property var capturedWhitePiecesString: gameInterface.capturedWhitePiecesString
+    property var capturedBlackPiecesString: gameInterface.capturedBlackPiecesString
     property int selectedRow: -1
     property int selectedCol: -1
     property color lightSquareColor: "#D1C4E9"
@@ -23,12 +25,13 @@ Item {
         id: chessGrid
         columns: 8
         rows: 8
-        anchors {
-            right: parent.right
-            top: parent.top
-        }
+        anchors.centerIn: parent
+        // anchors {
+        //     right: parent.right
+        //     top: parent.top
+        // }
         width: parent.width * 8/9
-        height: parent.height * 8/9
+        height: parent.height * 8/9 * 4/5
 
         Repeater {
             model: 64
@@ -120,8 +123,79 @@ Item {
         }
     }
 
+    Grid {
+        id: capturedBlackPieces
+        columns: 8
+        rows: 2
+        anchors {
+            top: parent.top
+            right: chessGrid.right
+            topMargin: 10
+        }
+        height: chessGrid.height * 1/8
+        width: chessGrid.width * 1/2
+        
+        Repeater {
+            model: 16
+            delegate: Item {
+                width: capturedBlackPieces.width / 8
+                height: capturedBlackPieces.height / 2
+
+                Rectangle {
+                    width: parent.width
+                    height: parent.height
+                    color: (index + Math.floor(index / 8)) % 2 == 0 ? lightSquareColor : darkSquareColor
+
+                    Image {
+                        width: parent.width
+                        height: parent.height
+                        source: capturedPieceSource(capturedBlackPiecesString[index])
+                        anchors.centerIn: parent
+                        fillMode: Image.PreserveAspectFit
+                    }
+                }
+            }
+        }
+    }
+
+    Grid {
+        id: capturedWhitePieces
+        columns: 8
+        rows: 2
+        anchors {
+            bottom: parent.bottom
+            right: chessGrid.right
+            bottomMargin: 10
+        }
+        height: chessGrid.height * 1/8
+        width: chessGrid.width * 1/2
+
+        Repeater {
+            model: 16
+            delegate: Item {
+                width: capturedWhitePieces.width / 8
+                height: capturedWhitePieces.height / 2
+
+                Rectangle {
+                    width: parent.width
+                    height: parent.height
+                    color: (index + Math.floor(index / 8)) % 2 == 0 ? lightSquareColor : darkSquareColor
+
+                    Image {
+                        width: parent.width
+                        height: parent.height
+                        source: capturedPieceSource(capturedWhitePiecesString[index])
+                        anchors.centerIn: parent
+                        fillMode: Image.PreserveAspectFit
+                    }
+                }
+            }
+        }        
+    }
+
     Row {
         spacing: 10
+        id: blackTimerSection
         anchors {
             top: chessGrid.top
             left: chessGrid.right
@@ -189,6 +263,7 @@ Item {
 
     // White Timer Section
     Row {
+        id: whiteTimerSection
         spacing: 10
         anchors {
             bottom: chessGrid.bottom
@@ -260,7 +335,7 @@ Item {
         spacing: 10
         anchors {
             top: chessGrid.bottom
-            left: chessGrid.left
+            left: chessGrid.right
             topMargin: 20
             leftMargin: 10
         }
@@ -341,6 +416,13 @@ Item {
         return "Images/" + piece + ".png"
     }
 
+    function capturedPieceSource(pieceString) {
+        if (pieceString === "") {
+            return ""
+        }
+        return "Images/" + pieceString + ".png"
+    }
+
     function handlePositionClick(index) {
         var row = 7 - Math.floor(index / 8)
         var col = index % 8
@@ -360,9 +442,9 @@ Item {
 
     Row {
         anchors {
-            top: parent.bottom
+            left: chessGrid.right
             horizontalCenter: chessGrid.horizontalCenter
-            topMargin: 10
+            leftMargin: 10
         }
         spacing: 10
         height: 25

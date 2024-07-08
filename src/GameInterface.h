@@ -17,6 +17,8 @@ class GameInterface : public QObject
     Q_PROPERTY(QList<int> legalMoves READ legalMoves WRITE setLegalMoves NOTIFY legalMovesChanged FINAL)
     Q_PROPERTY(int selectedGrid READ selectedGrid WRITE setSelectedGrid NOTIFY selectedGridChanged FINAL)
     Q_PROPERTY(QList<QString> dummyBoard READ dummyBoard WRITE setDummyBoard NOTIFY dummyBoardChanged FINAL)
+    Q_PROPERTY(QList<QString> capturedWhitePiecesString READ capturedWhitePiecesString WRITE setCapturedWhitePiecesString NOTIFY capturedWhitePiecesStringChanged FINAL)
+    Q_PROPERTY(QList<QString> capturedBlackPiecesString READ capturedBlackPiecesString WRITE setCapturedBlackPiecesString NOTIFY capturedBlackPiecesStringChanged FINAL)
     Q_PROPERTY(QString currentTimer READ currentTimer WRITE setCurrentTimer NOTIFY currentTimerChanged FINAL)
     Q_PROPERTY(QString whiteTimer READ whiteTimer WRITE setWhiteTimer NOTIFY whiteTimerChanged FINAL)
     Q_PROPERTY(QString blackTimer READ blackTimer WRITE setBlackTimer NOTIFY blackTimerChanged FINAL)
@@ -48,6 +50,12 @@ public:
 
     QString blackTimer() const;
     void setBlackTimer(const QString &newBlackTimer);
+
+    QList<QString> capturedWhitePiecesString() const;
+    void setCapturedWhitePiecesString(const QList<QString> &newCapturedWhitePiecesString);
+
+    QList<QString> capturedBlackPiecesString() const;
+    void setCapturedBlackPiecesString(const QList<QString> &newCapturedBlackPiecesString);
 
 public slots:
     void setLegalMoves(const QList<int> &newLegalMoves);
@@ -187,6 +195,21 @@ public slots:
         // m_dummyBoard[startingGrid] = "";
         boardHistory.push_back(m_dummyBoard);
         emit dummyBoardChanged();
+        std::cout << "white pieces size: " << gameEngine.board.whitePieces.size() << ", captured white pieces size: " << gameEngine.board.capturedWhitePieces.size() << std::endl;
+        for (auto capturedPiece : gameEngine.board.capturedWhitePieces) {
+            std::cout << "captured white piece: " << capturedPiece->toString() << std::endl;
+        }
+        m_capturedWhitePiecesString.clear();
+        m_capturedBlackPiecesString.clear();
+        for(auto piece : gameEngine.board.capturedWhitePieces) {
+            m_capturedWhitePiecesString.push_back(QString::fromStdString(piece->toString()));
+        }
+        emit capturedWhitePiecesStringChanged();
+        for(auto piece : gameEngine.board.capturedBlackPieces) {
+            std::cout << "captured black piece: " << piece->toString() << std::endl;
+            m_capturedBlackPiecesString.push_back(QString::fromStdString(piece->toString()));
+        }
+        emit capturedBlackPiecesStringChanged();
         return true;
     }
 signals:
@@ -200,6 +223,10 @@ signals:
     void whiteTimerChanged();
 
     void blackTimerChanged();
+
+    void capturedWhitePiecesStringChanged();
+
+    void capturedBlackPiecesStringChanged();
 
 private:
     QList<int> m_legalMoves;
@@ -239,6 +266,8 @@ private:
     int blackPlayerTimeMinutes = 1;
     int whiteTimeIncrementPerMove = 5;
     int blackTimeIncrementPerMove = 5;
+    QList<QString> m_capturedWhitePiecesString;
+    QList<QString> m_capturedBlackPiecesString;
 };
 
 #endif // GAMEINTERFACE_H

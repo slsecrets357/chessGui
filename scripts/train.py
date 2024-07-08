@@ -116,6 +116,7 @@ def train():
         state = env.reset()
         step_count = 0
         while True:
+            env.render()
             state_tensor = mcts._state_to_tensor(env.board)
             action_probs = mcts.get_action_probs(env.board, temp=1e-1)  # Adjusted temp value
             action = np.random.choice(4672, p=action_probs)

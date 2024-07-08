@@ -154,3 +154,29 @@ void GameInterface::addTimeToWhiteTimer(int seconds)
     m_whiteTimeRemaining = m_whiteTimeRemaining.addSecs(seconds);
     setWhiteTimer("" + m_whiteTimeRemaining.toString("mm:ss.zzz"));
 }
+
+QList<QString> GameInterface::capturedWhitePiecesString() const
+{
+    return m_capturedWhitePiecesString;
+}
+
+void GameInterface::setCapturedWhitePiecesString(const QList<QString> &newCapturedWhitePiecesString)
+{
+    if (m_capturedWhitePiecesString == newCapturedWhitePiecesString)
+        return;
+    m_capturedWhitePiecesString = newCapturedWhitePiecesString;
+    emit capturedWhitePiecesStringChanged();
+}
+
+QList<QString> GameInterface::capturedBlackPiecesString() const
+{
+    return m_capturedBlackPiecesString;
+}
+
+void GameInterface::setCapturedBlackPiecesString(const QList<QString> &newCapturedBlackPiecesString)
+{
+    if (m_capturedBlackPiecesString == newCapturedBlackPiecesString)
+        return;
+    m_capturedBlackPiecesString = newCapturedBlackPiecesString;
+    emit capturedBlackPiecesStringChanged();
+}

@@ -75,6 +75,26 @@ public:
 
     // Generate all possible moves for the piece
     virtual std::vector<Position>& generatePossibleMoves(const Board& board) = 0;
+
+    std::string toString() const {
+        // e.g. wr (white rook), bn (black knight)
+        std::string colorStr = color == Color::WHITE ? "w" : "b";
+        if (type == PieceType::ROOK) {
+            return colorStr + "r";
+        } else if (type == PieceType::KNIGHT) {
+            return colorStr + "n";
+        } else if (type == PieceType::BISHOP) {
+            return colorStr + "b";
+        } else if (type == PieceType::QUEEN) {
+            return colorStr + "q";
+        } else if (type == PieceType::KING) {
+            return colorStr + "k";
+        } else if (type == PieceType::PAWN) {
+            return colorStr + "p";
+        } else {
+            return "  ";
+        }
+    }
 };
 std::ostream& operator<<(std::ostream& os, const Piece& piece);
 
