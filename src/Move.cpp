@@ -64,19 +64,19 @@ void Move::undo(Board& board) {
         board.addPiece(capturedPiece, to);
         if (capturedPiece->getColor() == Color::WHITE) {
             board.whitePieces.push_back(capturedPiece);
-            if (!board.capturedBlackPieces.empty()) {
-                std::cout << "capturedBlackPieces is not empty" << std::endl;
-                board.capturedBlackPieces.pop_back();
-            } else {
-                std::cout << "Error: capturedBlackPieces is empty" << std::endl;
-            }
-        } else {
-            board.blackPieces.push_back(capturedPiece);
             if (!board.capturedWhitePieces.empty()) {
                 std::cout << "capturedWhitePieces is not empty" << std::endl;
                 board.capturedWhitePieces.pop_back();
             } else {
                 std::cout << "Error: capturedWhitePieces is empty" << std::endl;
+            }
+        } else {
+            board.blackPieces.push_back(capturedPiece);
+            if (!board.capturedBlackPieces.empty()) {
+                std::cout << "capturedBlackPieces is not empty" << std::endl;
+                board.capturedBlackPieces.pop_back();
+            } else {
+                std::cout << "Error: capturedBlackPieces is empty" << std::endl;
             }
         }
     }
