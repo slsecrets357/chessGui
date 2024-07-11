@@ -27,6 +27,7 @@ qt_add_qml_module(appChess2
         SOURCES src/Piece.h src/Piece.cpp
         SOURCES src/GameInterface.h src/GameInterface.cpp
         SOURCES src/Console.h src/Console.cpp
+        SOURCES src/StockfishWrapper.h
     RESOURCES
         "ui/Images/bp.png"
         "ui/Images/br.png"

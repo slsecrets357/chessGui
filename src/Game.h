@@ -4,9 +4,11 @@
 
 #include "Board.h"
 #include <string.h>
+#include "StockfishWrapper.h"
 
 class Game {
 public:
+    StockfishWrapper stockfish;
     Board board;
     int startGrid = -1;
     int destGrid = -1;

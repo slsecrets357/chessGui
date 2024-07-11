@@ -10,6 +10,9 @@
 #include <QString>
 #include <QTimer>
 #include <QTime>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
+#include <QFutureWatcher>
 
 class GameInterface : public QObject
 {
@@ -40,7 +43,7 @@ public:
     bool paused = true;
     std::vector<QList<QString>> boardHistory;
     std::vector<QString> pieceRepresentations = {"wr", "wn", "wb", "wq", "wk", "wp", "br", "bn", "bb", "bq", "bk", "bp", ""};
-
+    bool useAI = false;
 
     QString currentTimer() const;
     void setCurrentTimer(const QString &newCurrentTimer);
@@ -66,6 +69,9 @@ public slots:
     void blackTimeTimerTimeout();
     void addTimeToWhiteTimer(int seconds);
     void addTimeToBlackTimer(int seconds);
+    void toggleAI(bool toggle) {
+        this->useAI = toggle;
+    }
 
     void print() {
         gameEngine.board.printBoard();
@@ -82,7 +88,11 @@ public slots:
         emit dummyBoardChanged();
         std::cout << "after undoing move1..." << std::endl;
         gameEngine.board.printBoard();
-        return gameEngine.board.undoMove();
+        if(gameEngine.board.undoMove()) {
+            resetCapturedPieces();
+            return true;
+        }
+        return false;
     }
     bool checkStartingGrid(int grid) {
         return true;
@@ -90,56 +100,7 @@ public slots:
     bool checkDestinationGrid(int grid) {
         return true; // TODO: Implement this function
     }
-    void processSelectedGrid(int input) {
-        // std::cout << "processing input: " << input << std::endl;
-        int row = 7 - input / 8;
-        int col = input % 8;
-        setSelectedGrid(row * 8 + col);
-        selectedPiece = gameEngine.board.getPiece(Position(input));
-        if (startGrid == -1) {
-            from = Position(input);
-            if (!selectedPiece || selectedPiece->getColor() != gameEngine.board.getSideToMove()) {
-                std::cout << "invalid starting piece at " << from << ". please try again." << std::endl;
-                startGrid = -1;
-                return;
-            }
-            std::cout << "starting position selected: " << from << std::endl;
-            startGrid = input;
-            if(computeLegalMoves(input)) {
-                return;
-            } else {
-                startGrid = -1;
-                return;
-            }
-        } else if (destGrid == -1) {
-            destGrid = input;
-            to = Position(input);
-            auto destPiece = gameEngine.board.getPiece(to);
-            if (!destPiece || destPiece->getColor() != gameEngine.board.getSideToMove()) {
-                std::cout << "destination position selected: " << to << ", proceeding to making the move now." << std::endl;
-
-            } else {
-                std::cout << "changing starting position to " << to << "." << std::endl;
-                startGrid = destGrid; // since user selected a piece of the same color, assume it's the starting position
-                from = Position(input);
-                if (!selectedPiece || selectedPiece->getColor() != gameEngine.board.getSideToMove()) {
-                    std::cout << "invalid starting piece at " << from << ". please try again." << std::endl;
-                    startGrid = -1;
-                    destGrid = -1;
-                    return;
-                }
-                if(computeLegalMoves(input)) {
-                    destGrid = -1;
-                    return;
-                } else {
-                    startGrid = -1;
-                    destGrid = -1;
-                    return;
-                }
-                destGrid = -1;
-                return;
-            }
-        }
+    void executeMove() {
         if (gameEngine.board.movePiece(from, to)) {
             makeMove();
             gameEngine.board.updateCheckStatus();
@@ -162,6 +123,97 @@ public slots:
         clearLegalMoves();
         startGrid = -1;
         destGrid = -1;
+    }
+    void executeAIMove() {
+        std::string fen = gameEngine.board.toFEN(); // Convert the current board state to FEN
+        std::cout << "fen: " << fen << std::endl;
+
+        // Run the Stockfish computation in a separate thread
+        QFuture<std::string> future = QtConcurrent::run([this, fen]() {
+            return gameEngine.stockfish.getBestMoveTimed(fen, 3000);
+        });
+
+        // Watch the future and call a slot when the computation is done
+        QFutureWatcher<std::string> *watcher = new QFutureWatcher<std::string>(this);
+        connect(watcher, &QFutureWatcher<std::string>::finished, this, [this, watcher]() {
+            std::string bestMove = watcher->result();
+            watcher->deleteLater();
+
+            std::cout << "Stockfish suggests: " << bestMove << std::endl;
+            if (!bestMove.empty()) {
+                std::cout << bestMove.substr(0, 2) << " to " << bestMove.substr(2, 2) << std::endl;
+                from = Position(bestMove.substr(0, 2));
+                selectedPiece = gameEngine.board.getPiece(from);
+                if(!computeLegalMoves(from.row * 8 + from.col)) return;
+                to = Position(bestMove.substr(2, 2));
+                std::cout << "moving from " << from << " to " << to << std::endl;
+                executeMove();
+            }
+        });
+
+        watcher->setFuture(future);
+    }
+
+    void processSelectedGrid(int input) {
+        // std::cout << "processing input: " << input << std::endl;
+        int row = 7 - input / 8;
+        int col = input % 8;
+        setSelectedGrid(row * 8 + col);
+        if(useAI && gameEngine.board.getSideToMove() == Color::BLACK) {
+            std::cout << "black player's turn. waiting for AI to make a move." << std::endl;
+            return;
+        } else {
+            selectedPiece = gameEngine.board.getPiece(Position(input));
+            if (startGrid == -1) {
+                from = Position(input);
+                if (!selectedPiece || selectedPiece->getColor() != gameEngine.board.getSideToMove()) {
+                    std::cout << "invalid starting piece at " << from << ". please try again." << std::endl;
+                    startGrid = -1;
+                    return;
+                }
+                std::cout << "starting position selected: " << from << std::endl;
+                startGrid = input;
+                if(computeLegalMoves(input)) {
+                    return;
+                } else {
+                    startGrid = -1;
+                    return;
+                }
+            } else if (destGrid == -1) {
+                destGrid = input;
+                to = Position(input);
+                auto destPiece = gameEngine.board.getPiece(to);
+                if (!destPiece || destPiece->getColor() != gameEngine.board.getSideToMove()) {
+                    std::cout << "destination position selected: " << to << ", proceeding to making the move now." << std::endl;
+
+                } else {
+                    std::cout << "changing starting position to " << to << "." << std::endl;
+                    startGrid = destGrid; // since user selected a piece of the same color, assume it's the starting position
+                    from = Position(input);
+                    if (!selectedPiece || selectedPiece->getColor() != gameEngine.board.getSideToMove()) {
+                        std::cout << "invalid starting piece at " << from << ". please try again." << std::endl;
+                        startGrid = -1;
+                        destGrid = -1;
+                        return;
+                    }
+                    if(computeLegalMoves(input)) {
+                        destGrid = -1;
+                        return;
+                    } else {
+                        startGrid = -1;
+                        destGrid = -1;
+                        return;
+                    }
+                    destGrid = -1;
+                    return;
+                }
+            }
+        }
+        executeMove();
+        std::cout << "white move completed." << std::endl;
+        if (useAI && gameEngine.board.getSideToMove() == Color::BLACK) {
+            executeAIMove();
+        }
     }
     void clearLegalMoves() {
         setLegalMoves(QList<int>());
@@ -195,10 +247,10 @@ public slots:
         // m_dummyBoard[startingGrid] = "";
         boardHistory.push_back(m_dummyBoard);
         emit dummyBoardChanged();
-        std::cout << "white pieces size: " << gameEngine.board.whitePieces.size() << ", captured white pieces size: " << gameEngine.board.capturedWhitePieces.size() << std::endl;
-        for (auto capturedPiece : gameEngine.board.capturedWhitePieces) {
-            std::cout << "captured white piece: " << capturedPiece->toString() << std::endl;
-        }
+        resetCapturedPieces();
+        return true;
+    }
+    void resetCapturedPieces() {
         m_capturedWhitePiecesString.clear();
         m_capturedBlackPiecesString.clear();
         for(auto piece : gameEngine.board.capturedWhitePieces) {
@@ -210,7 +262,6 @@ public slots:
             m_capturedBlackPiecesString.push_back(QString::fromStdString(piece->toString()));
         }
         emit capturedBlackPiecesStringChanged();
-        return true;
     }
 signals:
     void legalMovesChanged();

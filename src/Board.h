@@ -5,6 +5,7 @@
 #include "Piece.h"
 #include "Move.h"
 #include <memory>
+#include <sstream>
 
 class Board {
 public:
@@ -118,6 +119,50 @@ public:
     bool getIsInCheck() const {
         return isInCheck;
     }
+
+    std::string toFEN() const {
+        std::stringstream fen;
+        // Board position
+        for (int row = 7; row >= 0; --row) {
+            int emptyCount = 0;
+            for (int col = 0; col < 8; ++col) {
+                auto piece = getPiece(Position(row, col));
+                if (piece) {
+                    if (emptyCount > 0) {
+                        fen << emptyCount;
+                        emptyCount = 0;
+                    }
+                    fen << piece->getFENChar();
+                } else {
+                    ++emptyCount;
+                }
+            }
+            if (emptyCount > 0) {
+                fen << emptyCount;
+            }
+            if (row > 0) {
+                fen << '/';
+            }
+        }
+
+        // Side to move
+        fen << (sideToMove == Color::WHITE ? " w" : " b");
+
+        // Castling rights (this is a placeholder, you should implement proper castling rights tracking)
+        fen << " KQkq";
+
+        // En passant target square (this is a placeholder, you should implement en passant tracking)
+        fen << " -";
+
+        // Halfmove clock (this is a placeholder, you should implement halfmove clock)
+        fen << " 0";
+
+        // Fullmove number (this is a placeholder, you should implement fullmove number tracking)
+        fen << " 1";
+
+        return fen.str();
+    }
+
 
 };
 

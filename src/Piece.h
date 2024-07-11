@@ -95,6 +95,25 @@ public:
             return "  ";
         }
     }
+    // Get FEN character for the piece
+    char getFENChar() const {
+        switch (type) {
+            case PieceType::ROOK:
+                return color == Color::WHITE ? 'R' : 'r';
+            case PieceType::KNIGHT:
+                return color == Color::WHITE ? 'N' : 'n';
+            case PieceType::BISHOP:
+                return color == Color::WHITE ? 'B' : 'b';
+            case PieceType::QUEEN:
+                return color == Color::WHITE ? 'Q' : 'q';
+            case PieceType::KING:
+                return color == Color::WHITE ? 'K' : 'k';
+            case PieceType::PAWN:
+                return color == Color::WHITE ? 'P' : 'p';
+            default:
+                return ' ';
+        }
+    }
 };
 std::ostream& operator<<(std::ostream& os, const Piece& piece);
 

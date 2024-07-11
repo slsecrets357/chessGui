@@ -197,10 +197,10 @@ Item {
         spacing: 10
         id: blackTimerSection
         anchors {
-            top: chessGrid.top
-            left: chessGrid.right
-            leftMargin: 40
-            topMargin: 10
+            bottom: chessGrid.top
+            left: chessGrid.left
+            leftMargin: 0
+            bottomMargin: 40
         }
 
         // Subtract Time Button for Black Timer
@@ -266,10 +266,10 @@ Item {
         id: whiteTimerSection
         spacing: 10
         anchors {
-            bottom: chessGrid.bottom
-            left: chessGrid.right
-            leftMargin: 40
-            bottomMargin: 10
+            top: chessGrid.bottom
+            left: chessGrid.left
+            leftMargin: 0
+            topMargin: 40
         }
 
         // Subtract Time Button for White Timer
@@ -293,7 +293,7 @@ Item {
         // White Timer Display
         Rectangle {
             id: whiteTimerDisplayContainer
-            width: 120
+            width: 140
             height: 40
             radius: 10
             color: "#F5F5F5"
@@ -441,10 +441,13 @@ Item {
     }
 
     Row {
+        id: controlButtons
         anchors {
             left: chessGrid.right
             horizontalCenter: chessGrid.horizontalCenter
             leftMargin: 10
+            top: parent.top
+            topMargin: 30
         }
         spacing: 10
         height: 25
@@ -472,5 +475,60 @@ Item {
                 gameInterface.print()
             }
         }
+        Button {
+            text: "Surrender"
+            background: Rectangle {
+                color: "#0CD2EE"
+                radius: 10
+                border.color: "#333333"
+                border.width: 1
+            }
+            onClicked: {
+                gameInterface.surrender()
+            }
+        }
+        Button {
+            text: "Restart"
+            background: Rectangle {
+                color: "#0CD2EE"
+                radius: 10
+                border.color: "#333333"
+                border.width: 1
+            }
+            onClicked: {
+                gameInterface.restart()
+            }
+        }
+        
+        Rectangle {
+            id: toggleSwitch
+            width: 80
+            height: 30
+            radius: 15
+            color: toggle.checked ? "#0CD2EE" : "#CCCCCC"
+            border.color: "#333333"
+            border.width: 1
+
+            Text {
+                anchors.centerIn: parent
+                text: toggle.checked ? "AI ON" : "AI OFF"
+                // color: "#333333"
+                // font.pointSize: 14
+            }
+
+            MouseArea {
+                id: toggle
+                anchors.fill: parent
+                property bool checked: false
+                onClicked: {
+                    toggle.checked = !toggle.checked
+                }
+                onCheckedChanged: {
+                    toggleSwitch.color = toggle.checked ? "#0CD2EE" : "#CCCCCC"
+                    gameInterface.toggleAI(toggle.checked)
+                }
+            }
+        }
     }
+    
 }
