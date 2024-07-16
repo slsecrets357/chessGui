@@ -118,6 +118,7 @@ Window {
 
     UserProfile {
         id: userProfile
+        board: board
         anchors {
             top: parent.top
             left: parent.left

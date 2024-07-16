@@ -61,6 +61,31 @@ public:
     void setCapturedBlackPiecesString(const QList<QString> &newCapturedBlackPiecesString);
 
 public slots:
+    void restart() {
+        gameEngine.board.initialize();
+        m_dummyBoard = {
+            "wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr",
+            "wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp",
+            "", "", "", "", "", "", "", "",
+            "", "", "", "", "", "", "", "",
+            "", "", "", "", "", "", "", "",
+            "", "", "", "", "", "", "", "",
+            "bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp",
+            "br", "bn", "bb", "bq", "bk", "bb", "bn", "br"
+        };
+        emit dummyBoardChanged();
+        resetCapturedPieces();
+        
+        m_currentTimeTimer->stop();
+        m_whiteTimeTimer->stop();
+        m_blackTimeTimer->stop();
+        m_currentTimeTimer->start();
+        m_whiteTimeRemaining = QTime(0, whitePlayerTimeMinutes, 0);
+        setWhiteTimer("" + m_whiteTimeRemaining.toString("mm:ss.zzz"));
+        m_blackTimeRemaining = QTime(0, blackPlayerTimeMinutes, 0);
+        setBlackTimer("" + m_blackTimeRemaining.toString("mm:ss.zzz"));
+        boardHistory.push_back(m_dummyBoard);
+    }
     void setLegalMoves(const QList<int> &newLegalMoves);
     void setSelectedGrid(int newSelectedGrid);
     void setDummyBoard(const QList<QString> &newDummyBoard);
@@ -130,7 +155,7 @@ public slots:
 
         // Run the Stockfish computation in a separate thread
         QFuture<std::string> future = QtConcurrent::run([this, fen]() {
-            return gameEngine.stockfish.getBestMoveTimed(fen, 3000);
+            return gameEngine.stockfish->getBestMoveTimed(fen, 3000);
         });
 
         // Watch the future and call a slot when the computation is done

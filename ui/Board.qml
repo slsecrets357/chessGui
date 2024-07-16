@@ -17,6 +17,7 @@ Item {
     property var capturedBlackPiecesString: gameInterface.capturedBlackPiecesString
     property int selectedRow: -1
     property int selectedCol: -1
+    property bool usingAI: false
     property color lightSquareColor: "#D1C4E9"
     property color darkSquareColor: "#7E57C2"
     property color highlightColor: "#0CD2EE" // New property for the highlight color
@@ -484,7 +485,7 @@ Item {
                 border.width: 1
             }
             onClicked: {
-                gameInterface.surrender()
+                surrenderWindow.visible = true
             }
         }
         Button {
@@ -522,6 +523,7 @@ Item {
                 property bool checked: false
                 onClicked: {
                     toggle.checked = !toggle.checked
+                    usingAI = toggle.checked
                 }
                 onCheckedChanged: {
                     toggleSwitch.color = toggle.checked ? "#0CD2EE" : "#CCCCCC"
@@ -529,6 +531,49 @@ Item {
                 }
             }
         }
+        
+        Window {
+            id: surrenderWindow
+            visible: false
+            width: 300
+            height: 200
+            title: "Game Over"
+            modality: Qt.ApplicationModal
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 20
+
+                Image {
+                    source: "Images/ff.png"
+                    width: 64
+                    height: 64
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Text {
+                    text: "You lost :("
+                    font.pixelSize: 20
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Button {
+                    text: "Restart"
+                    background: Rectangle {
+                        color: "#0CD2EE"
+                        radius: 10
+                        border.color: "#333333"
+                        border.width: 1
+                    }
+                    onClicked: {
+                        gameInterface.restart()
+                        surrenderWindow.visible = false
+                    }
+                }
+            }
+        }
+
     }
     
 }

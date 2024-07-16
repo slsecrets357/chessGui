@@ -5,6 +5,9 @@ import Qt.labs.platform 1.0
 
  Row {
     spacing: 50
+
+    property var board
+
     anchors {
         top: parent.top
         left: parent.left
@@ -20,7 +23,7 @@ import Qt.labs.platform 1.0
             color: "transparent"
             Text {
                 id: whitePlayerName
-                text: "White Player"
+                text: "Xinlinnn"
                 font.pixelSize: 20
                 visible: true
                 color: "#f5f5f5"
@@ -74,7 +77,7 @@ import Qt.labs.platform 1.0
                 width: parent.width
                 height: parent.height
                 fillMode: Image.PreserveAspectCrop
-                source: "Images/player1.png"
+                source: "Images/xinlinnn.png"
             }
 
             MouseArea {
@@ -139,7 +142,7 @@ import Qt.labs.platform 1.0
             color: "transparent"
             Text {
                 id: blackPlayerName
-                text: "Simonnn"
+                text: board.usingAI ? "AI" : "Player 2"
                 font.pixelSize: 20
                 visible: true
                 color: "#f5f5f5"
@@ -193,7 +196,7 @@ import Qt.labs.platform 1.0
                 width: parent.width
                 height: parent.height
                 fillMode: Image.PreserveAspectCrop
-                source: "Images/player2.png"
+                source: board.usingAI ? "Images/ai.jpeg" : "Images/player2.png"
             }
 
             MouseArea {
@@ -210,7 +213,7 @@ import Qt.labs.platform 1.0
         }
 
         Text {
-            text: "Elo: 753"
+            text: board.usingAI ? "Elo: 3570" : "Elo: 753"
             font.pixelSize: 16
             color: "#f5f5f5"
             anchors.horizontalCenter: parent.horizontalCenter

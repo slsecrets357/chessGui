@@ -8,7 +8,7 @@
 
 class Game {
 public:
-    StockfishWrapper stockfish;
+    std::unique_ptr<StockfishWrapper> stockfish;
     Board board;
     int startGrid = -1;
     int destGrid = -1;

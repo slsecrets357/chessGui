@@ -22,6 +22,10 @@ void Board::initialize() {
     for (auto& row : board) {
         std::fill(row.begin(), row.end(), nullptr);
     }
+    whitePieces.clear();
+    blackPieces.clear();
+    capturedWhitePieces.clear();
+    capturedBlackPieces.clear();
 
     // Add pawns
     for (int col = 0; col < 8; ++col) {

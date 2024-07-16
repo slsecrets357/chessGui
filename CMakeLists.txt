@@ -44,6 +44,8 @@ qt_add_qml_module(appChess2
         "ui/Images/ff.png"
         "ui/Images/player1.png"
         "ui/Images/player2.png"
+        "ui/Images/ai.jpeg"
+        "ui/Images/xinlinnn.png"
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

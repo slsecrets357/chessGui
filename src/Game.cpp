@@ -3,9 +3,16 @@
 #include "Game.h"
 #include <stdio.h>
 #include "Utility.h"
+#include <QCoreApplication>
+#include <QDir>
 
-Game::Game(): selectedPiece(nullptr), stockfish(L"D:\\QtProjects\\Chess2\\Stockfish\\build\\bin\\stockfish.exe")
+Game::Game(): selectedPiece(nullptr)
 {
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString stockfishPath = QDir(appDir).filePath("./classicalAI.exe");
+    // QString stockfishPath = QDir(appDir).filePath("D:\\QtProjects\\Chess2\\build\\Desktop_Qt_6_7_2_MinGW_64_bit-Debug\\classicalAI.exe");
+    stockfish = std::make_unique<StockfishWrapper>(stockfishPath.toStdWString());
+
     board.initialize();
     std::cout << "Game constructor" << std::endl;
 }
@@ -67,7 +74,7 @@ void Game::startGame() {
             if (board.getSideToMove() == Color::BLACK) { // Assuming AI plays black
                 std::string fen = board.toFEN(); // Convert the current board state to FEN
                 std::cout << "fen: " << fen << std::endl;
-                std::string bestMove = stockfish.getBestMoveTimed(fen, 1000);
+                std::string bestMove = stockfish->getBestMoveTimed(fen, 1000);
                 std::cout << "Stockfish suggests: " << bestMove << std::endl;
                 if (!bestMove.empty()) {
                     std::cout << bestMove.substr(0, 2) << " to " << bestMove.substr(2, 2) << std::endl;
@@ -131,7 +138,7 @@ bool Game::isGameOver() {
   return false;
 }
 void Game::processMove(Move move) {
-    
+
 }
 
 void Game::printBoard() {
@@ -148,7 +155,7 @@ void Game::printBoard() {
 
 //     // try {
 //     //     StockfishWrapper stockfish("C:\\Users\\simon\\Documents\\Chess\\external\\Stockfish\\build\\bin\\stockfish.exe");
-        
+
 //     //     std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 //     //     std::cout << "Requesting best move (1 second analysis)..." << std::endl;
 //     //     // std::string bestMove = stockfish.getBestMoveTimed(fen, 1000);  // 1000 ms = 1 second
